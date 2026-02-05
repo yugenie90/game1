@@ -50,13 +50,21 @@ const levelText = document.getElementById("levelText");
 const timeText = document.getElementById("timeText");
 const killText = document.getElementById("killText");
 const startOverlay = document.getElementById("startOverlay");
+const selectOverlay = document.getElementById("selectOverlay");
 const pauseOverlay = document.getElementById("pauseOverlay");
 const endOverlay = document.getElementById("endOverlay");
 const endTitle = document.getElementById("endTitle");
 const endDesc = document.getElementById("endDesc");
 const startButton = document.getElementById("startButton");
+const backButton = document.getElementById("backButton");
+const confirmButton = document.getElementById("confirmButton");
+const settingsButton = document.getElementById("settingsButton");
+const creditsButton = document.getElementById("creditsButton");
+const exitButton = document.getElementById("exitButton");
 const restartButton = document.getElementById("restartButton");
 const upgradeCards = document.getElementById("upgradeCards");
+const characterOptions = document.querySelectorAll("[data-character]");
+const difficultyOptions = document.querySelectorAll("[data-difficulty]");
 
 // =========================
 // 유틸리티 함수
@@ -71,6 +79,7 @@ const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 // =========================
 const State = {
   START: "START",
+  SELECT: "SELECT",
   PLAY: "PLAY",
   PAUSE: "PAUSE",
   END: "END",
@@ -118,6 +127,12 @@ const enemyModifiers = {
   speedMultiplier: 1,
   emailHpMultiplier: 1,
   contactCooldownMultiplier: 1,
+};
+
+// 컨셉 리스킨: 향후 확장을 고려한 선택 상태
+const selectionState = {
+  character: "default",
+  difficulty: "normal",
 };
 
 // =========================
@@ -224,14 +239,42 @@ window.addEventListener("keyup", (event) => {
   if (["ArrowRight", "KeyD"].includes(event.code)) input.right = false;
 });
 
-startButton.addEventListener("click", () => startGame());
-restartButton.addEventListener("click", () => startGame());
+startButton.addEventListener("click", () => setState(State.SELECT));
+backButton.addEventListener("click", () => setState(State.START));
+confirmButton.addEventListener("click", () => startGame());
+restartButton.addEventListener("click", () => setState(State.START));
+settingsButton.addEventListener("click", () => {
+  addFloatingText(CONFIG.CANVAS_WIDTH / 2 - 40, 80, "설정은 준비 중", "#6B7280");
+});
+creditsButton.addEventListener("click", () => {
+  addFloatingText(CONFIG.CANVAS_WIDTH / 2 - 40, 80, "기타 메뉴 준비 중", "#6B7280");
+});
+exitButton.addEventListener("click", () => {
+  addFloatingText(CONFIG.CANVAS_WIDTH / 2 - 20, 80, "업무 화면 복귀", "#6B7280");
+});
+
+characterOptions.forEach((button) => {
+  button.addEventListener("click", () => {
+    selectionState.character = button.dataset.character;
+    characterOptions.forEach((option) => option.classList.remove("option--active"));
+    button.classList.add("option--active");
+  });
+});
+
+difficultyOptions.forEach((button) => {
+  button.addEventListener("click", () => {
+    selectionState.difficulty = button.dataset.difficulty;
+    difficultyOptions.forEach((option) => option.classList.remove("option--active"));
+    button.classList.add("option--active");
+  });
+});
 
 // =========================
 // 게임 제어 함수
 // =========================
 function startGame() {
   resetGame();
+  applyDifficulty();
   setState(State.PLAY);
 }
 
@@ -269,6 +312,7 @@ function resetGame() {
 function setState(nextState) {
   gameState = nextState;
   startOverlay.classList.toggle("overlay--show", nextState === State.START);
+  selectOverlay.classList.toggle("overlay--show", nextState === State.SELECT);
   pauseOverlay.classList.toggle("overlay--show", nextState === State.PAUSE);
   endOverlay.classList.toggle("overlay--show", nextState === State.END);
 }
@@ -277,7 +321,10 @@ function setState(nextState) {
 // 업데이트 루프
 // =========================
 function update(dt) {
-  if (gameState !== State.PLAY) return;
+  if (gameState !== State.PLAY) {
+    updateFloatingTexts(dt);
+    return;
+  }
 
   elapsed += dt;
   auraPulse += (dt / 1000) * CONFIG.VISUALS.AURA_PULSE_SPEED;
@@ -425,6 +472,14 @@ function updateHUD() {
   levelText.textContent = player.level;
   timeText.textContent = formatTime(timeRemaining);
   killText.textContent = kills;
+}
+
+function applyDifficulty() {
+  if (selectionState.difficulty === "hard") {
+    player.maxHp = Math.max(80, player.maxHp - 10);
+    player.hp = Math.min(player.hp, player.maxHp);
+    enemyModifiers.speedMultiplier *= 1.1;
+  }
 }
 
 // =========================
