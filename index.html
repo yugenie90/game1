@@ -42,11 +42,43 @@
     <div class="canvas-wrap">
       <canvas id="gameCanvas" width="900" height="540"></canvas>
       <div id="startOverlay" class="overlay overlay--show">
-        <div class="overlay__panel">
-          <h1>Office Survivors</h1>
+        <div class="overlay__panel overlay__panel--menu">
+          <h1 class="title">Office Survivors</h1>
           <p class="overlay__subtitle">오늘도 버텨봅니다 · 몰겜 모드 ON</p>
-          <p>WASD / 방향키로 조용히 이동하세요.</p>
-          <button id="startButton" class="btn">시작하기</button>
+          <div class="menu">
+            <button id="startButton" class="menu__item">게임 시작</button>
+            <button id="settingsButton" class="menu__item">설정</button>
+            <button id="creditsButton" class="menu__item">기타</button>
+            <button id="exitButton" class="menu__item">종료</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="selectOverlay" class="overlay">
+        <div class="overlay__panel overlay__panel--wide">
+          <h2>캐릭터/난이도 선택</h2>
+          <p class="overlay__subtitle">추후 캐릭터/스테이지/스킬 확장을 고려한 구조입니다.</p>
+          <div class="select-grid">
+            <section class="select-card">
+              <h3>캐릭터</h3>
+              <div class="select-options">
+                <button class="option option--active" data-character="default">기본 회사원</button>
+                <button class="option option--disabled" disabled>추가 캐릭터 (예정)</button>
+              </div>
+            </section>
+            <section class="select-card">
+              <h3>난이도</h3>
+              <div class="select-options">
+                <button class="option option--active" data-difficulty="normal">보통</button>
+                <button class="option" data-difficulty="hard">어려움</button>
+                <button class="option option--disabled" disabled>아주 어려움 (예정)</button>
+              </div>
+            </section>
+          </div>
+          <div class="select-actions">
+            <button id="backButton" class="btn btn--ghost">뒤로</button>
+            <button id="confirmButton" class="btn">출근 시작</button>
+          </div>
         </div>
       </div>
 
